@@ -1,4 +1,4 @@
-# Fetcher
+# Fetcher [![Build Status](https://travis-ci.org/matteosister/fetcher.svg?branch=master)](https://travis-ci.org/matteosister/fetcher)
 
 `work in progress`
 
