@@ -8,8 +8,8 @@ defmodule Fetcher.Mixfile do
       elixir: "~> 1.4",
       start_permanent: Mix.env == :prod,
       deps: deps(),
-      description: description,
-      package: package
+      description: description(),
+      package: package()
     ]
   end
 
