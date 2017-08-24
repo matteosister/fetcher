@@ -2,8 +2,8 @@ defmodule Fetcher.Map do
   @moduledoc """
   Fetcher implementation for the map type
   """
-
   import Enum
+  @type result :: {:ok, map} | {:error, binary | [binary]}
 
   @doc """
   Extracts data from a map. It returns a tuple with {:ok, params} if every requested
@@ -11,67 +11,62 @@ defmodule Fetcher.Map do
 
   if `all` is true the function returns either {:ok, params}, or {:error, [error]} with all the keys that
   couldn't be found.
-
-  ## Examples
-
-      iex> #{__MODULE__}.fetch(%{"a" => 1}, ~w[a])
-      {:ok, %{"a" => 1}}
-
-      iex> #{__MODULE__}.fetch(%{"a" => 1, "b" => 2}, ~w[a])
-      {:ok, %{"a" => 1}}
-
-      iex> #{__MODULE__}.fetch(%{"a" => 1, "b" => 2}, ~w[a b])
-      {:ok, %{"a" => 1, "b" => 2}}
-
-      iex> #{__MODULE__}.fetch(%{"a" => 1, "b" => 2}, ~w[a b c])
-      {:error, "the field 'c' is missing"}
-
-      iex> #{__MODULE__}.fetch(%{a: 1, b: 2}, ~w[a b]a)
-      {:ok, %{a: 1, b: 2}}
-
-      iex> #{__MODULE__}.fetch(%{a: 1, b: 2}, ~w[c d]a)
-      {:error, "the field 'c' is missing"}
-
-      iex> #{__MODULE__}.fetch(%{a: 1, b: 2}, ~w[c d]a, true)
-      {:error, ["the field 'c' is missing", "the field 'd' is missing"]}
   """
-  @spec fetch(map, [binary], boolean) :: {:ok, map} | {:error, binary}
-  def fetch(source, keys, all \\ false) do
+  @spec fetch(map, [any], Fetcher.options) :: result
+  def fetch(source, keys, options) do
     source
-    |> do_fetch_params(keys, %{})
-    |> handle_result(source, keys, all)
+    |> do_fetch_params(keys, %{}, options)
+    |> handle_result(source, keys, options)
   end
 
-  @spec do_fetch_params(map, [term], map) :: map
-  defp do_fetch_params(_params, [], acc), do: acc
-  defp do_fetch_params(source, [field_name | other_fields_names], acc) do
-    with {:ok, value} <- fetch_param(source, field_name) do
-      do_fetch_params(source, other_fields_names, Map.put(acc, field_name, value))
+  @spec do_fetch_params(map, [term], map, Fetcher.options) :: map
+  defp do_fetch_params(_params, [], acc, _options), do: acc
+  defp do_fetch_params(source, [field_name | other_fields_names], acc, options) do
+    with {:ok, value} <- fetch_param(source, field_name, options) do
+      do_fetch_params(source, other_fields_names, Map.put(acc, field_name, value), options)
     end
   end
 
-  @spec fetch_param(map, binary) :: {:ok, any} | {:error, binary}
-  defp fetch_param(source, field_name) do
-    case Map.get(source, field_name) do
-      nil -> {:error, error_message(field_name)}
-      v   -> {:ok, v}
+  @spec fetch_param(map, binary, Fetcher.options) :: result
+  defp fetch_param(source, field_name, options) do
+    with {:ok, value} <- Map.fetch(source, field_name),
+         :ok <- discard_check(value, options) do
+      {:ok, value}
+    else
+      :error -> {:error, error_message(field_name)}
     end
   end
 
-  defp handle_result({:error, _} = error, _source, _required_params, false), do: error
-  defp handle_result({:error, _}, source, keys, true) do
-    keys
-    |> reduce([], fn field_name, acc ->
-      case fetch_param(source, field_name) do
-        {:ok, _} -> acc
-        {:error, error} -> [error | acc]
-      end
-    end)
-    |> fn errors -> {:error, reverse errors} end.()
+  @spec handle_result(result, map, [any], Fetcher.options) :: result
+  defp handle_result({:error, _} = error, source, keys, options) do
+    if get_option(options, :all, false) do
+      keys
+      |> reduce([], fn field_name, acc ->
+        case fetch_param(source, field_name, options) do
+          {:ok, _} -> acc
+          {:error, error} -> [error | acc]
+        end
+      end)
+      |> fn errors -> {:error, reverse errors} end.()
+    else
+      error
+    end
   end
-  defp handle_result(result, _source, _required_params, _all) do
+  defp handle_result(result, _source, _required_params, _options) do
     {:ok, result}
   end
 
+  @spec error_message(binary) :: binary
   defp error_message(field_name), do: "the field '#{field_name}' is missing"
+
+  @spec discard_check(any, Fetcher.options) :: :ok | :error
+  defp discard_check(value, options) do
+    options
+    |> get_option(:fail_check, fn _ -> false end)
+    |> Kernel.apply([value])
+    |> if(do: :error, else: :ok)
+  end
+
+  @spec get_option(Fetcher.options, atom, any) :: any
+  defp get_option(options, name, default), do: Keyword.get(options, name, default)
 end
