@@ -1,15 +1,16 @@
 defmodule Fetcher.Map do
   @moduledoc """
-  utility to extract data from a map, giving contextual errors
+  Fetcher implementation for the map type
   """
+
   import Enum
 
   @doc """
-  this method extracts the requested data from a map. It gives you back a tuple with {:ok, params} if every requested
-  parameter is present, while returns {:error, "the parameter '...' is missing"} when the first of the given parameter
-  couldn't be found.
+  Extracts data from a map. It returns a tuple with {:ok, params} if every requested
+  key is present, and {:error, "the parameter '...' is missing"} for the first key not found.
 
-  The third boolean parameter could be true if you want to traverse all tha map and getting back all errors
+  if `all` is true the function returns either {:ok, params}, or {:error, [error]} with all the keys that
+  couldn't be found.
 
   ## Examples
 
@@ -35,10 +36,10 @@ defmodule Fetcher.Map do
       {:error, ["the field 'c' is missing", "the field 'd' is missing"]}
   """
   @spec fetch(map, [binary], boolean) :: {:ok, map} | {:error, binary}
-  def fetch(source, required_params, all \\ false) do
+  def fetch(source, keys, all \\ false) do
     source
-    |> do_fetch_params(required_params, %{})
-    |> handle_result(source, required_params, all)
+    |> do_fetch_params(keys, %{})
+    |> handle_result(source, keys, all)
   end
 
   @spec do_fetch_params(map, [term], map) :: map
@@ -58,8 +59,8 @@ defmodule Fetcher.Map do
   end
 
   defp handle_result({:error, _} = error, _source, _required_params, false), do: error
-  defp handle_result({:error, _}, source, required_params, true) do
-    required_params
+  defp handle_result({:error, _}, source, keys, true) do
+    keys
     |> reduce([], fn field_name, acc ->
       case fetch_param(source, field_name) do
         {:ok, _} -> acc

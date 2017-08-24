@@ -1,11 +1,12 @@
 defmodule FetcherTest do
+  use ExUnit.Case, async: true
+  doctest Fetcher
+
   defmodule FetcherTest.Data do
     defstruct [:a, :b, :c]
 
     def new(a, b, c), do: %__MODULE__{a: a, b: b, c: c}
   end
-
-  use ExUnit.Case, async: true
 
   test "fetch one field from a struct" do
     assert {:ok, %{a: "a"}} === Fetcher.fetch(FetcherTest.Data.new("a", "b", "c"), ~w(a)a)
