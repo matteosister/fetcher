@@ -10,11 +10,12 @@ defmodule Fetcher do
   extracts the given `selector` from the `source`.
 
   Possible options:
-      - all: (boolean) true to return all errored fields, false to return only the first one encountered.
-      - fail_check: (a function that returns a boolean) tells fetcher how to consider not valid a field based on its value.
-        Normally fetcher consider not valid only if the field is not present at all. While a null field is ok.
 
-  Always returns `{:ok, result}` or `{:error, error}`
+  - all: (boolean) true to return all errored fields, false to return only the first one encountered.
+  - fail_check: (a function that returns a boolean) tells fetcher how to consider not valid a field based on its value.
+    Normally fetcher consider not valid only if the field is not present at all. While a null field is ok.
+
+  Returns `{:ok, result}` or `{:error, error}`
 
   ## Examples
 
