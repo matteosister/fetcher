@@ -15,25 +15,25 @@ defmodule Fetcher do
 
   ## Examples
 
-      iex> #{__MODULE__}.fetch(%{"a" => 1}, ~w[a])
+      iex> #{__MODULE__}.fetch(%{"a" => 1}, ["a"])
       {:ok, %{"a" => 1}}
 
-      iex> #{__MODULE__}.fetch(%{"a" => 1, "b" => 2}, ~w[a])
+      iex> #{__MODULE__}.fetch(%{"a" => 1, "b" => 2}, ["a"])
       {:ok, %{"a" => 1}}
 
-      iex> #{__MODULE__}.fetch(%{"a" => 1, "b" => 2}, ~w[a b])
+      iex> #{__MODULE__}.fetch(%{"a" => 1, "b" => 2}, ["a", "b"])
       {:ok, %{"a" => 1, "b" => 2}}
 
-      iex> #{__MODULE__}.fetch(%{"a" => 1, "b" => 2}, ~w[a b c])
+      iex> #{__MODULE__}.fetch(%{"a" => 1, "b" => 2}, ["a", "b", "c"])
       {:error, "the field 'c' is missing"}
 
-      iex> #{__MODULE__}.fetch(%{a: 1, b: 2}, ~w[a b]a)
+      iex> #{__MODULE__}.fetch(%{a: 1, b: 2}, [:a, :b])
       {:ok, %{a: 1, b: 2}}
 
-      iex> #{__MODULE__}.fetch(%{a: 1, b: 2}, ~w[c d]a)
+      iex> #{__MODULE__}.fetch(%{a: 1, b: 2}, [:c, :d])
       {:error, "the field 'c' is missing"}
 
-      iex> #{__MODULE__}.fetch(%{a: 1, b: 2}, ~w[c d]a, all: true)
+      iex> #{__MODULE__}.fetch(%{a: 1, b: 2}, [:c, :d], all: true)
       {:error, ["the field 'c' is missing", "the field 'd' is missing"]}
   """
   @spec fetch(any, selector, options) :: {:ok, any} | {:error, binary|[binary]}
