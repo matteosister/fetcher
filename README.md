@@ -2,7 +2,9 @@
 
 `work in progress`
 
-This elixir library allows to fetch multiple data from data structures getting back meaningful errors
+Fetcher is a library to extract multiple values at once from big/nested data structures, while validating them and getting back meaningful errors.
+
+[Read the documentation](https://hexdocs.pm/fetcher)
 
 ## Installation
 
