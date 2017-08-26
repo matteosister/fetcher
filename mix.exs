@@ -9,7 +9,9 @@ defmodule Fetcher.Mixfile do
       start_permanent: Mix.env == :prod,
       deps: deps(),
       description: description(),
-      package: package()
+      package: package(),
+      docs: [source_url: "https://github.com/matteosister/fetcher",
+        main: "Fetcher"]
     ]
   end
 
