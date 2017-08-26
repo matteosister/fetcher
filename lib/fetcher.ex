@@ -1,6 +1,33 @@
 defmodule Fetcher do
   @moduledoc """
-  Public api of the library
+  Fetcher is a library to extract multiple values at once from big/nested data
+  structures, while validating them and getting back meaningful errors.
+
+  ### Do I need Fetcher?
+
+  Fetcher is a low level library. A tool to put under your belt when
+  you have data structures and the need to extract values while doing
+  some sort of validation.
+
+  A suitable context could be a controller, where you get a map of user provided
+  parameters, and you want to extract and validate some of them, and,
+  in case of an error, getting back which fields are missing and
+  send a meaningful error to the client.
+
+  ### Examples
+
+  ``` elixir
+  data = %{foo: "bar", baz: "qux"}
+
+  # Nothing fancy here
+  Fetcher.fetch(data, [:foo]) # {:ok, %{foo: "bar"}}
+
+  # Multimple keys
+  Fetcher.fetch(data, [:foo, :baz]) # {:ok, %{foo: "bar", baz: "qux"}}
+
+  # Wrong key
+  Fetcher.fetch(data, [:foo, :qux]) # {:error, "the field 'qux' is missing"}
+  ```
   """
 
   @type options :: [all: boolean, fail_check: (any -> boolean)]
