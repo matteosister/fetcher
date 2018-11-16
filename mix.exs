@@ -6,12 +6,12 @@ defmodule Fetcher.Mixfile do
       app: :fetcher,
       version: "0.3.0",
       elixir: "~> 1.4",
-      start_permanent: Mix.env == :prod,
+      start_permanent: Mix.env() == :prod,
       deps: deps(),
       description: description(),
       package: package(),
-      docs: [source_url: "https://github.com/matteosister/fetcher",
-        main: "Fetcher"]
+      docs: [source_url: "https://github.com/matteosister/fetcher", main: "Fetcher"],
+      dialyzer: [plt_add_deps: :transitive, ignore_warnings: ".dialyzerignore"]
     ]
   end
 
@@ -24,7 +24,8 @@ defmodule Fetcher.Mixfile do
 
   defp deps do
     [
-      {:ex_doc, "~> 0.16", only: :dev, runtime: false}
+      {:ex_doc, "~> 0.19", only: :dev, runtime: false},
+      {:dialyxir, "~> 0.5", only: [:dev]}
     ]
   end
 
@@ -33,8 +34,10 @@ defmodule Fetcher.Mixfile do
   end
 
   defp package do
-    %{maintainers: ["Matteo Giachino"],
+    %{
+      maintainers: ["Matteo Giachino"],
       licenses: ["Apache 2.0"],
-      links: %{"GitHub" => "https://github.com/matteosister/fetcher"}}
+      links: %{"GitHub" => "https://github.com/matteosister/fetcher"}
+    }
   end
 end
